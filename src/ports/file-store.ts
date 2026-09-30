@@ -1,7 +1,8 @@
 /**
  * Archivio file versionato (il repo dati). Ogni scrittura è un commit.
  * `update` applica una trasformazione con concorrenza ottimistica:
- * l'implementazione rilegge e riprova se il file è cambiato nel frattempo.
+ * l'implementazione rilegge e riprova se il file è cambiato nel frattempo;
+ * se il contenuto non cambia non crea alcun commit.
  */
 export interface FileStore {
   readText(path: string): Promise<string | null>;

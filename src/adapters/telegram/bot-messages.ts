@@ -8,4 +8,11 @@ export const BotMessages = {
     `Non sei ancora abilitato. Comunica il tuo ID Telegram (${userId}) a chi gestisce il bot.`,
   emptyMessage: "Il messaggio è vuoto, non ho salvato nulla.",
   error: "Si è verificato un errore, riprova tra poco.",
+  review: {
+    confirmed: "Grazie, recap confermato ✅",
+    "already-confirmed": "Il recap era già confermato 👍",
+    integrated: "Integrazione salvata nel recap ✅",
+    "recap-not-found": "Non trovo un recap per quel mese.",
+    "unknown-user": "Non sei abilitato a questa operazione.",
+  },
 } as const;

@@ -16,7 +16,10 @@ export class InMemoryFileStore implements FileStore {
   }
 
   async updateText(path: string, transform: (current: string | null) => string, message: string): Promise<void> {
-    this.texts.set(path, transform(this.texts.get(path) ?? null));
+    const current = this.texts.get(path) ?? null;
+    const next = transform(current);
+    if (next === current) return;
+    this.texts.set(path, next);
     this.commits.push(message);
   }
 

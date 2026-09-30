@@ -69,7 +69,9 @@ export class GithubContentsStore implements FileStore {
     return withRetry(async () => {
       const file = await this.getFile(path);
       const current = file?.content === undefined ? null : base64ToUtf8(file.content);
-      await this.put(path, utf8ToBase64(transform(current)), message, file?.sha);
+      const next = transform(current);
+      if (next === current) return;
+      await this.put(path, utf8ToBase64(next), message, file?.sha);
     }, this.retry);
   }
 

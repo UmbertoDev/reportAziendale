@@ -73,9 +73,15 @@ describe("GithubContentsStore", () => {
 
   it("non ritenta errori non recuperabili", async () => {
     const { fn } = scriptedFetch([file("A"), json({ message: "no" }, 403)]);
-    await expect(new GithubContentsStore(config, fn, noWait).updateText("x.md", (c) => c!, "m")).rejects.toBeInstanceOf(
+    await expect(new GithubContentsStore(config, fn, noWait).updateText("x.md", (c) => `${c}!`, "m")).rejects.toBeInstanceOf(
       GithubApiError,
     );
+  });
+
+  it("non crea commit se il contenuto non cambia", async () => {
+    const { fn, calls } = scriptedFetch([file("A")]);
+    await new GithubContentsStore(config, fn).updateText("x.md", (c) => c!, "m");
+    expect(calls.map((c) => c.method)).toEqual(["GET"]);
   });
 
   it("elenca solo i file di una cartella", async () => {
