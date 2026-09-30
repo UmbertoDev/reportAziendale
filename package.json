@@ -1,0 +1,49 @@
+{
+  "name": "report-aziendale",
+  "version": "0.1.0",
+  "description": "Workflow Telegram -> diario Git -> recap LLM -> report PPT mensile",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run --project unit",
+    "test:e2e": "vitest run --project e2e",
+    "worker:dev": "wrangler dev",
+    "worker:deploy": "wrangler deploy",
+    "job:recap": "tsx src/entrypoints/jobs/monthly-recap.ts",
+    "job:reminder": "tsx src/entrypoints/jobs/recap-reminder.ts",
+    "job:report": "tsx src/entrypoints/jobs/monthly-report.ts",
+    "template:generate": "tsx scripts/generate-template.ts",
+    "release": "standard-version"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UmbertoDev/reportAziendale.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/UmbertoDev/reportAziendale/issues"
+  },
+  "homepage": "https://github.com/UmbertoDev/reportAziendale#readme",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260930.2",
+    "@types/node": "^22.20.4",
+    "pptxgenjs": "^4.0.1",
+    "standard-version": "^9.5.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7",
+    "wrangler": "^4.144.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.129.0",
+    "jszip": "^3.10.2",
+    "zod": "^4.6.5"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}

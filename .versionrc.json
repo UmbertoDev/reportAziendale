@@ -1,0 +1,11 @@
+{
+  "types": [
+    { "type": "feat", "section": "Funzionalità" },
+    { "type": "fix", "section": "Correzioni" },
+    { "type": "refactor", "section": "Refactoring" },
+    { "type": "docs", "section": "Documentazione" },
+    { "type": "test", "section": "Test", "hidden": true },
+    { "type": "chore", "hidden": true },
+    { "type": "ci", "hidden": true }
+  ]
+}
