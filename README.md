@@ -105,6 +105,10 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook" \
 
 I workflow in `.github/workflows/` partono da soli (orari in UTC) e si possono lanciare a mano da *Actions → Run workflow*, indicando il mese `YYYY-MM`. Nota: GitHub esegue i cron solo dal branch di default.
 
+## Test end-to-end
+
+Guida passo passo, chiavi comprese, per provare il giro completo con dati finti: [docs/TESTING.md](docs/TESTING.md).
+
 ## Sviluppo
 
 ```bash
