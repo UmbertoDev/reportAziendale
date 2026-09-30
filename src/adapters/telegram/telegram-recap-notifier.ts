@@ -22,6 +22,13 @@ export class TelegramRecapNotifier implements RecapNotifier, RecapGeneratedListe
     await this.sendWithButtons(person.telegramUserId, intro + recap.body, this.buttons(recap));
   }
 
+  async remindRecap(person: Person, recap: MonthlyRecap): Promise<void> {
+    const text =
+      `⏰ Promemoria: il recap ${recap.month} non è ancora confermato.\n` +
+      `Se non lo confermi entro fine mese, il report uscirà marcato come "non confermato".`;
+    await this.sendWithButtons(person.telegramUserId, text, this.buttons(recap));
+  }
+
   protected buttons(recap: MonthlyRecap): ReplyMarkup {
     return {
       inline_keyboard: [

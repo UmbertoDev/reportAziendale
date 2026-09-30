@@ -1,0 +1,33 @@
+name: Promemoria conferma recap
+
+on:
+  schedule:
+    # Il 27 e il 29 alle 07:00 UTC
+    - cron: "0 7 27,29 * *"
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Mese (YYYY-MM), vuoto = mese corrente"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run job:reminder
+        env:
+          DATA_REPO: ${{ github.repository }}
+          DATA_BRANCH: ${{ vars.DATA_BRANCH || 'data' }}
+          TIMEZONE: ${{ vars.TIMEZONE || 'Europe/Rome' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          MONTH: ${{ inputs.month }}
