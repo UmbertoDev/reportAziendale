@@ -1,3 +1,5 @@
+import type { ContextRepository } from "../../src/ports/context-repository.js";
+import type { LlmClient, LlmRequest } from "../../src/ports/llm-client.js";
 import type { TelegramApi } from "../../src/adapters/telegram/telegram-api.js";
 import type { ReplyMarkup } from "../../src/adapters/telegram/telegram-types.js";
 import type { Person } from "../../src/domain/person.js";
@@ -77,3 +79,22 @@ export const textUpdate = (userId: number, text: string, updateId = 1) => ({
     text,
   },
 });
+
+export class FakeLlmClient implements LlmClient {
+  readonly requests: LlmRequest[] = [];
+
+  constructor(private readonly reply: (request: LlmRequest) => string = () => "## Sintesi\n\nRecap di prova") {}
+
+  async complete(request: LlmRequest): Promise<string> {
+    this.requests.push(request);
+    return this.reply(request);
+  }
+}
+
+export class FakeContextRepository implements ContextRepository {
+  constructor(private readonly docs: Record<string, string> = {}) {}
+
+  async read(name: string): Promise<string> {
+    return this.docs[name] ?? "";
+  }
+}
