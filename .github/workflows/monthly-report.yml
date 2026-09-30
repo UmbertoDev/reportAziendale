@@ -1,0 +1,39 @@
+name: Report mensile PPT
+
+on:
+  schedule:
+    # Dal 28 al 31 alle 16:00 UTC: il job procede solo nell'ultimo giorno del mese (ora di Roma)
+    - cron: "0 16 28-31 * *"
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Mese da elaborare (YYYY-MM), vuoto = mese corrente solo se è l'ultimo giorno"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-branch
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run job:report
+        env:
+          DATA_REPO: ${{ github.repository }}
+          DATA_BRANCH: ${{ vars.DATA_BRANCH || 'data' }}
+          TIMEZONE: ${{ vars.TIMEZONE || 'Europe/Rome' }}
+          REPORT_TEMPLATE: ${{ vars.REPORT_TEMPLATE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+          MONTH: ${{ inputs.month }}
