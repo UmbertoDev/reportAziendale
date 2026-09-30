@@ -75,9 +75,11 @@ Nessun segreto nel repo.
 | `TELEGRAM_BOT_TOKEN` | secret | Worker + Actions | Bot API |
 | `TELEGRAM_WEBHOOK_SECRET` | secret | Worker | verifica che le chiamate arrivino da Telegram |
 | `GITHUB_TOKEN` | secret | Worker | token fine-grained, solo questo repo, permesso *Contents: read and write* |
-| `ANTHROPIC_API_KEY` | secret | Actions | recap e report |
+| `CLAUDE_CODE_OAUTH_TOKEN` | secret | Actions o `.env` locale | recap e report in modalità `LOCAL` (da `claude setup-token`) |
+| `ANTHROPIC_API_KEY` | secret | Actions o `.env` locale | solo in modalità `API_KEY` |
 | `DATA_REPO`, `DATA_BRANCH`, `TIMEZONE` | variabili | `wrangler.toml` | già impostate |
-| `DATA_BRANCH`, `TIMEZONE`, `LLM_MODEL`, `REPORT_TEMPLATE` | variabili (facoltative) | Actions → Variables | override dei default |
+| `SCHEDULE_ON_ACTIONS` | variabile | Actions → Variables | `true` per far partire i cron su Actions |
+| `LLM_PROVIDER`, `DATA_BRANCH`, `TIMEZONE`, `LLM_MODEL`, `REPORT_TEMPLATE` | variabili (facoltative) | Actions → Variables | override dei default |
 
 Nelle Actions `GITHUB_TOKEN` è quello automatico del workflow.
 

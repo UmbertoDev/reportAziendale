@@ -42,7 +42,8 @@ Se passa, il codice funziona. Le sezioni successive collegano i servizi reali.
 | `TELEGRAM_BOT_TOKEN` | Il bot riceve e invia messaggi | Telegram, [@BotFather](https://t.me/BotFather) | gratis |
 | `TELEGRAM_WEBHOOK_SECRET` | Il Worker accetta solo chiamate di Telegram | La inventi tu (comando sotto) | gratis |
 | `GITHUB_TOKEN` | Il bot e i job scrivono nel branch `data` | GitHub, token *fine-grained* | gratis |
-| `ANTHROPIC_API_KEY` | Recap e testi del PPT | [console.anthropic.com](https://console.anthropic.com) | a consumo, pochi centesimi per un test |
+| `CLAUDE_CODE_OAUTH_TOKEN` | Recap e testi del PPT con l'abbonamento Claude (modalità `LOCAL`, default) | `claude setup-token` | incluso nell'abbonamento |
+| `ANTHROPIC_API_KEY` | Solo in alternativa, modalità `API_KEY` | [console.anthropic.com](https://console.anthropic.com) | a consumo, serve la carta |
 | Account Cloudflare | Ospita il bot (Worker) | [dash.cloudflare.com](https://dash.cloudflare.com/sign-up) | gratis |
 | Il tuo ID Telegram | Abilitarti nell'anagrafica | Te lo dice il bot con `/start`, oppure [@userinfobot](https://t.me/userinfobot) | gratis |
 
@@ -70,15 +71,22 @@ openssl rand -hex 32
 
 Questo token serve al bot e all'esecuzione locale dei job. Su GitHub Actions i job usano il token automatico del workflow, quindi lì non va inserito.
 
-### 1.4 Chiave Anthropic
+### 1.4 Claude per recap e report (senza carta)
 
-1. Accedi a [console.anthropic.com](https://console.anthropic.com).
-2. **Settings → Billing**: aggiungi credito (bastano pochi dollari; un giro di test costa centesimi).
-3. **Settings → API keys → Create key**: la chiave inizia con `sk-ant-`.
+Il default è la modalità `LOCAL`: i job usano Claude Code con l'abbonamento Claude, senza chiave API.
 
-> Il credito del progetto Claude usato in questa chat **non** è una chiave API: per i job serve una chiave della Console.
+- **In locale**, sul PC dove sei già loggato in Claude Code, non serve altro.
+- **Su GitHub Actions o in una routine cron**, genera un token dell'abbonamento:
 
-Per risparmiare durante i test puoi usare un modello più economico con `LLM_MODEL=claude-sonnet-5-5` (il default è `claude-opus-5-5`).
+```bash
+claude setup-token     # stampa un token sk-ant-oat...
+```
+
+Quel valore è `CLAUDE_CODE_OAUTH_TOKEN`. Tutte le opzioni (Actions, routine locale, API) sono spiegate in [ESECUZIONE-LLM.md](ESECUZIONE-LLM.md).
+
+In alternativa, con la carta: `LLM_PROVIDER=API_KEY` e una chiave `ANTHROPIC_API_KEY` presa da [console.anthropic.com](https://console.anthropic.com) (Settings → API keys).
+
+Per consumare meno durante i test: `LLM_MODEL=sonnet` (o `haiku`).
 
 ### 1.5 Il tuo ID Telegram
 
@@ -226,10 +234,11 @@ DATA_REPO=UmbertoDev/reportAziendale
 DATA_BRANCH=data
 TIMEZONE=Europe/Rome
 GITHUB_TOKEN=github_pat_...
-ANTHROPIC_API_KEY=sk-ant-...
 TELEGRAM_BOT_TOKEN=7123456789:AAH...
-# facoltativo, per spendere meno nei test:
-# LLM_MODEL=claude-sonnet-5-5
+LLM_PROVIDER=LOCAL          # Claude Code con l'abbonamento; API_KEY per l'API a consumo
+# CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat...   # solo se su questo PC Claude Code non è loggato
+# ANTHROPIC_API_KEY=sk-ant-...            # solo con LLM_PROVIDER=API_KEY
+# LLM_MODEL=sonnet                        # facoltativo, per consumare meno nei test
 ```
 
 Caricale nella shell:
@@ -299,10 +308,11 @@ Senza `MONTH` il job controlla la data: se oggi non è l'ultimo giorno del mese 
 Dopo il passo 2.1 (codice su `main`, `main` branch di default):
 
 1. **Settings → Secrets and variables → Actions → New repository secret**:
-   - `ANTHROPIC_API_KEY`
+   - `CLAUDE_CODE_OAUTH_TOKEN` (modalità `LOCAL`, default)
    - `TELEGRAM_BOT_TOKEN`
-2. (Facoltativo) scheda **Variables**: `LLM_MODEL`, `DATA_BRANCH`, `TIMEZONE`, `REPORT_TEMPLATE`.
-3. **Actions** → scegli il workflow → **Run workflow** → nel campo mese scrivi `2026-09`:
+   - `ANTHROPIC_API_KEY` solo se vuoi usare la modalità `API_KEY`
+2. (Facoltativo) scheda **Variables**: `SCHEDULE_ON_ACTIONS=true` per accendere i cron, `LLM_PROVIDER`, `LLM_MODEL`, `DATA_BRANCH`, `TIMEZONE`, `REPORT_TEMPLATE`.
+3. **Actions** → scegli il workflow → **Run workflow** → scegli `LOCAL` o `API_KEY` e nel campo mese scrivi `2026-09`:
    - *Recap mensile* (con l'opzione "rigenera" se il recap esiste già)
    - *Promemoria conferma recap*
    - *Report mensile PPT*
@@ -310,7 +320,7 @@ Dopo il passo 2.1 (codice su `main`, `main` branch di default):
 
 Qui `GITHUB_TOKEN` non va creato: è quello automatico del workflow, che ha già i permessi di scrittura.
 
-Calendario automatico (orari UTC): recap il 25 alle 07:00, promemoria il 27 e il 29 alle 07:00, report dal 28 al 31 alle 16:00 (procede solo l'ultimo giorno).
+Calendario automatico (orari UTC, solo con `SCHEDULE_ON_ACTIONS=true`): recap il 25 alle 07:00, promemoria il 27 e il 29 alle 07:00, report dal 28 al 31 alle 16:00 (procede solo l'ultimo giorno). In alternativa i job possono girare con una routine sul PC di un collega: [ESECUZIONE-LLM.md](ESECUZIONE-LLM.md).
 
 ---
 
@@ -341,7 +351,9 @@ Calendario automatico (orari UTC): recap il 25 alle 07:00, promemoria il 27 e il
 | Job recap: `skipped` / `already-exists` | Recap già generato | `OVERWRITE=true` |
 | Job report: `skipped` / `no-recap` | Manca il recap del mese | Lancia prima il job recap |
 | Job: `Variabile d'ambiente mancante` | `.env` non caricato | `set -a && source .env && set +a` nella stessa shell |
-| Errore Anthropic 401 | Chiave errata | Rigenera la chiave in Console |
+| `Claude Code CLI fallita`, "Not logged in" o errore di autenticazione | Modalità `LOCAL` senza login né token | `claude` loggato sul PC, oppure `CLAUDE_CODE_OAUTH_TOKEN` (rigeneralo con `claude setup-token` se scaduto) |
+| `Impossibile avviare claude` | CLI non installata o non nel `PATH` | `npm install -g @anthropic-ai/claude-code`, oppure `CLAUDE_BIN=/percorso/claude` |
+| Errore Anthropic 401 (modalità `API_KEY`) | Chiave errata | Rigenera la chiave in Console |
 | Errore Anthropic 400 sul credito | Credito esaurito | Console → Billing |
 | "Run workflow" non compare | Workflow non presenti sul branch di default | Passo 2.1 |
 | Pulsanti Conferma/Integra senza effetto | Worker non online o webhook non collegato | Sezione 4 |
