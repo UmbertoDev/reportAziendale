@@ -10,14 +10,14 @@ Venditore ──Telegram──▶ Bot (Cloudflare Worker) ──commit──▶ 
   ultimo giorno GitHub Action "Report PPT"    ── LLM ──▶ report/YYYY-MM/YYYY-MM-<persona>.pptx (dal template)
 ```
 
-Nessun server da gestire: il bot è un Worker gratuito, le elaborazioni girano su GitHub Actions, l'LLM è l'API Anthropic.
+Nessun server da gestire: il bot è un Worker gratuito; le elaborazioni girano su GitHub Actions o su una routine locale, con Claude Code in abbonamento (default) o con l'API Anthropic. Dettagli in [docs/ESECUZIONE-LLM.md](docs/ESECUZIONE-LLM.md).
 
 ## Scelte di default
 
 | Tema | Scelta | Dove cambiarla |
 |---|---|---|
 | Repo | Un solo repo: codice su `main`, dati sul branch `data` (commit automatici) | variabile `DATA_BRANCH` |
-| LLM | API Anthropic, modello `claude-opus-5-5`, dietro l'interfaccia `LlmClient` | `LLM_PROVIDER`, `LLM_MODEL`, `src/adapters/llm/` |
+| LLM | `LOCAL` (default): Claude Code CLI con l'abbonamento, nessuna chiave API. `API_KEY`: API Anthropic a consumo. Entrambi dietro `LlmClient` | `LLM_PROVIDER`, `LLM_MODEL`, `src/adapters/llm/` |
 | Recap non confermato | Il report esce lo stesso, con "NON confermato dal venditore" in copertina | `src/application/build-monthly-report.ts` |
 | Template PPT | Segnaposto generato da `npm run template:generate` | `templates/report-mensile.pptx` o variabile `REPORT_TEMPLATE` |
 | Report | Un PPT per venditore | `DataLayout.reportFile` |

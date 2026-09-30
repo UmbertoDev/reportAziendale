@@ -6,6 +6,11 @@ on:
     - cron: "0 7 25 * *"
   workflow_dispatch:
     inputs:
+      llm_provider:
+        description: "LOCAL = Claude Code con abbonamento, API_KEY = API Anthropic a consumo"
+        type: choice
+        options: [LOCAL, API_KEY]
+        default: LOCAL
       month:
         description: "Mese da elaborare (YYYY-MM), vuoto = mese corrente"
         required: false
@@ -23,6 +28,8 @@ concurrency:
 
 jobs:
   recap:
+    # I cron partono su Actions solo se SCHEDULE_ON_ACTIONS=true (evita doppioni con la routine locale).
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.SCHEDULE_ON_ACTIONS == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,12 +38,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Installa Claude Code (modalità LOCAL)
+        if: ${{ (inputs.llm_provider || vars.LLM_PROVIDER || 'LOCAL') != 'API_KEY' }}
+        run: npm install -g @anthropic-ai/claude-code
       - run: npm run job:recap
         env:
           DATA_REPO: ${{ github.repository }}
           DATA_BRANCH: ${{ vars.DATA_BRANCH || 'data' }}
           TIMEZONE: ${{ vars.TIMEZONE || 'Europe/Rome' }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LLM_PROVIDER: ${{ inputs.llm_provider || vars.LLM_PROVIDER || 'LOCAL' }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           LLM_MODEL: ${{ vars.LLM_MODEL }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}

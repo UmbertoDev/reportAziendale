@@ -1,6 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it } from "vitest";
 import { AnthropicLlmClient, LlmRefusalError } from "../../../src/adapters/llm/anthropic-llm-client.js";
+import { ClaudeCodeCliLlmClient } from "../../../src/adapters/llm/claude-code-cli-llm-client.js";
 import { createLlmClient } from "../../../src/adapters/llm/llm-client-factory.js";
 
 function fakeAnthropic(response: Record<string, unknown>) {
@@ -57,12 +58,16 @@ describe("AnthropicLlmClient", () => {
 });
 
 describe("createLlmClient", () => {
-  it("usa Anthropic come default", () => {
-    expect(createLlmClient({ ANTHROPIC_API_KEY: "k" })).toBeInstanceOf(AnthropicLlmClient);
+  it.each([undefined, "", "LOCAL", "local", "claude-code"])("LLM_PROVIDER=%s usa Claude Code in locale", (provider) => {
+    expect(createLlmClient({ LLM_PROVIDER: provider })).toBeInstanceOf(ClaudeCodeCliLlmClient);
   });
 
-  it("richiede la chiave", () => {
-    expect(() => createLlmClient({})).toThrow(/ANTHROPIC_API_KEY/);
+  it.each(["API_KEY", "anthropic"])("LLM_PROVIDER=%s usa l'API Anthropic", (provider) => {
+    expect(createLlmClient({ LLM_PROVIDER: provider, ANTHROPIC_API_KEY: "k" })).toBeInstanceOf(AnthropicLlmClient);
+  });
+
+  it("con API_KEY richiede la chiave", () => {
+    expect(() => createLlmClient({ LLM_PROVIDER: "API_KEY" })).toThrow(/ANTHROPIC_API_KEY/);
   });
 
   it("rifiuta fornitori sconosciuti", () => {
