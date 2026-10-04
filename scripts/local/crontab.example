@@ -1,0 +1,13 @@
+# Routine locale del report (orari nel fuso della macchina).
+# Installa con: crontab -e  e incolla queste righe, sostituendo il percorso.
+REPO=/Users/NOME/reportAziendale
+
+# Recap: dal 25 al 28 alle 09:00. Se il PC era spento il 25 recupera nei giorni dopo;
+# i recap già generati vengono saltati, quindi nessun doppione.
+0 9 25-28 * * $REPO/scripts/local/run-job.sh recap
+
+# Promemoria a chi non ha confermato: 27 e 29 alle 09:30
+30 9 27,29 * * $REPO/scripts/local/run-job.sh reminder
+
+# Report PPT: gira dal 28 al 31 alle 18:00 ma procede solo l'ultimo giorno del mese
+0 18 28-31 * * $REPO/scripts/local/run-job.sh report

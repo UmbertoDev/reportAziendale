@@ -1,0 +1,13 @@
+name = "report-aziendale-bot"
+main = "src/entrypoints/worker/index.ts"
+compatibility_date = "2026-09-01"
+
+[vars]
+DATA_REPO = "UmbertoDev/reportAziendale"
+DATA_BRANCH = "data"
+TIMEZONE = "Europe/Rome"
+
+# Secret (mai nel repo), da impostare con:
+#   npx wrangler secret put TELEGRAM_BOT_TOKEN
+#   npx wrangler secret put TELEGRAM_WEBHOOK_SECRET
+#   npx wrangler secret put GITHUB_TOKEN
